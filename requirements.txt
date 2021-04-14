@@ -4,8 +4,12 @@ Webpack(imports/exports)
    Eslint
    2 mode
      -Dev
-      Dev Server, SourceMaps, Eslint, Not Minified JS & CSS
-     - Prod
+      Dev Server, //reload
+       SourceMaps,// исходные карты /
+        Eslint, //поддержка чистоты кода
+        Not Minified JS & CSS//во время разработки важно понимать что в коде
+
+     - Prod //сжатый код
      Minified Code
 Git
 
