@@ -2,17 +2,33 @@ const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 const path=require('path')
 const HTMLWwebpackPlugin =require('html-webpack-plugin')
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
-const CopyPlugin = require("copy-webpack-plugin");
+const CopyPlugin = require("copy-webpack-plugin")
 
 const isProd = process.env.NODE_ENV==='production'
 const isDev = !isProd
 
 const filename=ext=>isDev? `bundle.${ext}`:`bundle.[hash].${ext}`
 
+const jsLoaders=()=>{
+  const loaders = [
+    {
+      loader: "babel-loader",
+      options: {
+        presets: ['@babel/preset-env']
+      }
+    }
+  ]
+  if (isDev) {
+    loaders.push('eslint-loader')
+  }
+
+    return loaders
+}
 module.exports={
     context: path.resolve(__dirname, 'src'), //указывает где лажат исходники
+
     mode: 'development',
-    entry: './index.js', //start point
+    entry: ['@babel/polyfill','./index.js'], //start point/ babel for async
     output: {
         filename: filename('js'),
         path: path.resolve(__dirname, 'dist')
@@ -25,7 +41,16 @@ module.exports={
         }
     },
     devtool: isDev ? 'source-map' : false,
+    //watch: true,//default in dev-server
+    target: 'web',
+    // watchOptions: {
+    //     ignored: /node_modules/,
+    //     aggregateTimeout: 200,
+    //     poll: 1000,
+    // },
     devServer: {
+        //contentBase: path.resolve(__dirname,'src'),
+        //watchContentBase: true,
         port: 3000,
         hot: isDev
     },
@@ -55,7 +80,14 @@ module.exports={
             {
                 test: /\.s[ac]ss$/i,
                 use: [
-                    MiniCssExtractPlugin.loader,
+                    {
+                       loader: MiniCssExtractPlugin.loader,
+                        options: {
+                           //hmr: isDev,
+                          //  reloadAll: true //reload scss
+                        }
+                    },
+
                     // Translates CSS into CommonJS
                     "css-loader",
                     // Compiles Sass to CSS
@@ -65,12 +97,7 @@ module.exports={
             {
                 test: /\.m?js$/,
                 exclude: /node_modules/,
-                use: {
-                    loader: "babel-loader",
-                    options: {
-                        presets: ['@babel/preset-env']
-                    }
-                }
+                use: jsLoaders()
             }
         ],
     },
